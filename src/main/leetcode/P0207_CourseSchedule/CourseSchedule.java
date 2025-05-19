@@ -1,12 +1,62 @@
 package P0207_CourseSchedule;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 
 public class CourseSchedule {
+
+    /**
+     * LeetCode 207 - Course Schedule
+     * https://leetcode.com/problems/course-schedule/
+     *
+     * Approach (BFS Topological Sort - Kahn's Algorithm):
+     * - Build graph with adjacency list and in-degree array
+     * - Add all courses with in-degree 0 to a queue
+     * - While the queue is not empty:
+     *     - Remove one course, mark it as completed
+     *     - Decrease in-degree of its neighbors
+     *     - If a neighbor’s in-degree becomes 0, add it to queue
+     * - If the number of completed courses equals numCourses, return true
+     *   otherwise, a cycle exists → return false
+     *
+     * Time: O(V + E) — V = numCourses, E = total prerequisites
+     * Space: O(V + E)
+     */
+    public boolean canFinish2(int numCourses, int[][] prerequisites) {
+
+        Map<Integer, List<Integer>> graph = new HashMap<>();
+        int completed = 0;
+        int[] inDegree = new int[numCourses];
+
+        for(int[] curr : prerequisites) {
+            int from = curr[1];
+            int to = curr[0];
+            graph.computeIfAbsent(from, k -> new ArrayList<>()).add(to);
+            inDegree[curr[0]]++;
+        }
+
+        Queue<Integer> queue = new LinkedList<>();
+        for(int i = 0; i < numCourses; i++) {
+            if(inDegree[i] == 0) {
+                queue.add(i);
+            }
+        }
+
+        while(!queue.isEmpty()) {
+            int course = queue.poll();
+            completed++;
+
+            for(int to : graph.getOrDefault(course, new ArrayList<>())) {
+                inDegree[to]--;
+                if(inDegree[to] == 0) {
+                    queue.add(to);
+                }
+            }
+        }
+
+        return completed == numCourses;
+    }
+
 
     /**
      * LeetCode 207 - Course Schedule
